@@ -1,4 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+
+const debounce = (callback, delay) => {
+  let timeout;
+  return (value) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      callback(value);
+    }, delay);
+  };
+};
 
 function App() {
 
@@ -17,13 +27,19 @@ function App() {
         product.name.toLowerCase().includes(query.toLowerCase())
       );
       setProductSugg(filtered);
+      console.log('API');
+
     } catch (error) {
       console.error("Errore nel fetch dei prodotti:", error);
     }
   };
 
+  const debounceFetchProducts = useCallback(
+    debounce(fetchProducts, 500)
+    , [])
+
   useEffect(() => {
-    fetchProducts(query)
+    debounceFetchProducts(query)
   }, [query]);
 
   return (
