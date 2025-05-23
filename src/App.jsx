@@ -5,21 +5,25 @@ function App() {
   const [query, setQuery] = useState('');
   const [productSugg, setProductSugg] = useState([]);
 
-
-  useEffect(() => {
+  const fetchProducts = async (query) => {
     if (!query.trim()) {
       setProductSugg([]);
       return;
     }
-    fetch("http://localhost:3333/products")
-      .then(res => res.json())
-      .then(data => {
-        const filtered = data.filter(product =>
-          product.name.toLowerCase().includes(query.toLowerCase())
-        );
-        setProductSugg(filtered);
-      })
-      .catch(error => console.error(error));
+    try {
+      const res = await fetch("http://localhost:3333/products");
+      const data = await res.json();
+      const filtered = data.filter(product =>
+        product.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setProductSugg(filtered);
+    } catch (error) {
+      console.error("Errore nel fetch dei prodotti:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts(query)
   }, [query]);
 
   return (
