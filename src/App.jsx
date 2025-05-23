@@ -14,6 +14,7 @@ function App() {
 
   const [query, setQuery] = useState('');
   const [productSugg, setProductSugg] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const fetchProducts = async (query) => {
     if (!query.trim()) {
@@ -23,10 +24,10 @@ function App() {
     try {
       const res = await fetch("http://localhost:3333/products");
       const data = await res.json();
-      const filtered = data.filter(product =>
+      const filteredName = data.filter(product =>
         product.name.toLowerCase().includes(query.toLowerCase())
       );
-      setProductSugg(filtered);
+      setProductSugg(filteredName);
       console.log('API');
 
     } catch (error) {
@@ -42,6 +43,19 @@ function App() {
     debounceFetchProducts(query)
   }, [query]);
 
+  const fetchProductsDetails = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:3333/products/${id}`);
+      const data = await res.json();
+      setSelectedProduct(data);
+      setQuery('');
+      setProductSugg([]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
   return (
     <div>
       <h1>Autocomplete</h1>
@@ -54,8 +68,16 @@ function App() {
       {productSugg.length > 0 && (
         <div className='dropdown'>
           {productSugg.map((product) => (
-            <p key={product.id}>{product.name}</p>
+            <p key={product.id} onClick={() => fetchProductsDetails(product.id)}>{product.name}</p>
           ))}
+        </div>
+      )}
+      {selectedProduct && (
+        <div className='card'>
+          <h2>{selectedProduct.name}</h2>
+          <img src={selectedProduct.image} alt={selectedProduct.name} />
+          <p>{selectedProduct.description}</p>
+          <p><strong>Prezzo:</strong>{selectedProduct.price}€ </p>
         </div>
       )}
     </div>
